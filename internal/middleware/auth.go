@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"api_barbearia/internal/models"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
-	"api_barbearia/internal/models"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -38,6 +40,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
+		ctx := context.WithValue(r.Context(), "userID", claims.ID)
+
 			if err != nil {
 				fmt.Println("JWT ERROR:", err)
 				http.Error(w, "token invalido", http.StatusUnauthorized)
@@ -49,6 +53,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				return
 			}
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

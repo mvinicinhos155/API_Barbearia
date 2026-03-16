@@ -86,3 +86,17 @@ func HandlerLogin (w http.ResponseWriter, r *http.Request, db *sql.DB){
 			})
 
 }
+
+func HandlerGetUsers (w http.ResponseWriter, r *http.Request, db *sql.DB) {
+
+	AllUsers, err := services.GetAllUser(db)
+		if err !=  nil {
+			http.Error(w,"Erro ao  pegar todos os usuários", http.StatusInternalServerError)
+			return
+		}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message" : "Usuários listados com sucesso",
+		"Usuários" : AllUsers,
+	})
+}

@@ -33,3 +33,31 @@ func GetUserbyEmail (db *sql.DB, email string) (models.Users , error) {
 
 		return user, nil
 }
+
+func GetAllUser (db *sql.DB) ([]models.Users, error) {
+	query := "SELECT id, name, email, role FROM users"
+
+	rows, err := db.Query(query)
+		if err != nil {
+			fmt.Println("Erro com bbanco de dados")
+			return nil, err
+		}
+	
+	defer rows.Close()
+
+	var users []models.Users
+
+	for rows.Next() {
+
+		var user  models.Users
+
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Role)
+			if err != nil {
+				return nil, err
+			}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}

@@ -32,6 +32,16 @@ func main() {
 		}
 	})
 
+	http.Handle("/users", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodGet:
+			handler.HandlerGetUsers(w, r, db)
+
+		default:
+			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		}
+	})))
+
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
