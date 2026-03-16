@@ -9,7 +9,7 @@ import (
 func InsertHairCut (db *sql.DB, hair *models.Haircuts) error {
 
 
-	query := "INSERT INTO haircut (haircut_style, price, day, hour, user_id) VALUES (1$, 2$, 3$, 4$, 5$);"
+	query := "INSERT INTO haircut (haircut_style, price, day, hour, user_id) VALUES ($1, $2, $3, $4, $5);"
 
      _ ,err := db.Exec(query, hair.Haircut_style, hair.Price, hair.Day, hair.Hour, hair.User_id)
 	  if err != nil {

@@ -48,7 +48,7 @@ func HandlerCreateUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 }
 
-func HandlerLogin (w http.ResponseWriter, r *http.Request, db *sql.DB) error {
+func HandlerLogin (w http.ResponseWriter, r *http.Request, db *sql.DB){
 
 	var Login struct {
 		Email string `json:"email"`
@@ -58,25 +58,25 @@ func HandlerLogin (w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	 err := json.NewDecoder(r.Body).Decode(&Login)
 	 	if err != nil {
 			http.Error(w, "Erro ao enviar dados", http.StatusBadRequest)
-			return err
+			return 
 		}
 
 	dbUser, err := services.GetUserbyEmail(db, Login.Email)
 		if err != nil {
 			http.Error(w, "Erro ao fazer login", http.StatusBadRequest)
-			return err	
+			return 	
 		}
 
 	err = bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(Login.Password))
 		if err != nil {
 			http.Error(w, "Email ou senha invalidos", http.StatusUnauthorized)
-			return err
+			return 
 		} 
 		
 	tokenString, err := token.GenerateJwt(&dbUser)
 			if err != nil {
 				http.Error(w, "Erro ao gerar token", http.StatusInternalServerError)
-				return err
+				return
 			}
 
 			json.NewEncoder(w).Encode(map[string]interface{}{
@@ -85,5 +85,4 @@ func HandlerLogin (w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 				"token" : tokenString,
 			})
 
-			return nil
 }

@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 	"api_barbearia/internal/models"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func GenerateJwt (user *models.Users) (string, error) {
@@ -16,9 +16,9 @@ func GenerateJwt (user *models.Users) (string, error) {
 		Name: user.Name,
 		Email: user.Email,
 		Role: user.Role,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
-			IssuedAt: time.Now().Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 

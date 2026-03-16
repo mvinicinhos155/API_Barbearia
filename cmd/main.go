@@ -3,11 +3,11 @@ package main
 import (
 	"api_barbearia/internal/database"
 	"api_barbearia/internal/handlers"
+	"api_barbearia/internal/middleware"
 	//"fmt"
 	"log"
 	"net/http"
 	//"time"
-
 	//"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
 )
@@ -39,13 +39,15 @@ func main() {
 		}
 	})
 
-	http.HandleFunc("/haircut", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
+	http.Handle("/haircut", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
 		case http.MethodPost:
 			handler.HandlerCreateHaircut(w, r, db)
+
+		default:
+			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		}
-		  
-	})
+	})))
 
 	/*s := gocron.NewScheduler(time.Local)
 
