@@ -4,11 +4,10 @@ import (
 	"api_barbearia/internal/database"
 	"api_barbearia/internal/handlers"
 	"api_barbearia/internal/middleware"
-	//"fmt"
+	"api_barbearia/internal/jobs"
 	"log"
 	"net/http"
-	//"time"
-	//"github.com/go-co-op/gocron"
+
 	"github.com/joho/godotenv"
 )
 
@@ -32,7 +31,7 @@ func main() {
 		}
 	})
 
-	http.Handle("/users", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	http.Handle("/users", middleware.AuthMiddleware(middleware.PermisionAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodGet:
 			handler.HandlerGetUsers(w, r, db)
@@ -40,7 +39,7 @@ func main() {
 		default:
 			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		}
-	})))
+	}))))
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -49,34 +48,50 @@ func main() {
 		}
 	})
 
-	http.Handle("/haircut", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Handle("/usersID", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
-		case http.MethodPost:
-			handler.HandlerCreateHaircut(w, r, db)
-
-		default:
-			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		case http.MethodDelete:
+			handler.HandlerDeleteUser(w, r, db)
 		}
 	})))
 
-	/*s := gocron.NewScheduler(time.Local)
+	http.Handle("/haircut", middleware.AuthMiddleware(middleware.PermisionAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodPost:
+			handler.HandlerCreateHairs(w, r, db)
+		}
+	}))))
 
-	task := func ()  {
-		fmt.Println("Testando o gocron, Olá...")
-	}
-
-	s.Every(5).Seconds().Do(task)
-	s.Every(1).Friday().At(corte.horar).Do(func ()  {
-		fmt.Println("Está na hora...")
+	http.HandleFunc("/haircuts", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodGet:
+			handler.HandlerGetAllHairs(w, r, db)
+		}
 	})
 
-	go func ()  {
-		s.StartAsync()
-	}()
+	http.HandleFunc("/haircutID", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodDelete:
+			handler.HandlerDeleteHair(w, r, db)
+		}
+	})
 
-	select{}*/
+	http.Handle("/appointment", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodPost:
+			handler.HandlerCreateAppointment(w, r, db)
+		}
+	})))
+
+	http.Handle("/appoint", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodGet:
+			handler.HandlerGetByUserId(w, r, db)
+		}
+	})))
 
 
+	jobs.StartReminderJob(db)
 
 	database.Migrations(db)
 

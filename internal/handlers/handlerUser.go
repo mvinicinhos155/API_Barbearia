@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -79,10 +80,12 @@ func HandlerLogin (w http.ResponseWriter, r *http.Request, db *sql.DB){
 				return
 			}
 
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"message" : "login feito com sucesso",
-				"login" : dbUser,
-				"token" : tokenString,
+	dbUser.Password = ""
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+			"message" : "login feito com sucesso",
+			"login" : dbUser,
+			"token" : tokenString,
 			})
 
 }
@@ -98,5 +101,24 @@ func HandlerGetUsers (w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message" : "Usuários listados com sucesso",
 		"Usuários" : AllUsers,
+	})
+}
+
+func HandlerDeleteUser (w http.ResponseWriter, r *http.Request, db *sql.DB) {
+
+	userID, ok := r.Context().Value("userID").(int)
+		if !ok {
+			http.Error(w, "Não atorizado", http.StatusUnauthorized)
+			return
+		}
+
+	err := services.DeleteUser(db, userID)
+		if err != nil {
+			http.Error(w, "Erro ao deletar user", http.StatusBadRequest)
+			return
+		}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message" : "Usuário deletado com sucesso",
 	})
 }

@@ -5,39 +5,60 @@ import (
 	"api_barbearia/internal/services"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
-func HandlerCreateHaircut(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var hairCut models.Haircuts
+func HandlerCreateHairs(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	var hair models.Haircuts
 
-	userClaims := r.Context().Value("userID").(int)
-	fmt.Println("USER ID:", userClaims)
-
-	err := json.NewDecoder(r.Body).Decode(&hairCut)
+	err := json.NewDecoder(r.Body).Decode(&hair)
 		if err != nil {
 			http.Error(w, "Erro ao enviar dados", http.StatusBadRequest)
 			return
 		}
 
-		hair := models.Haircuts{
-			Haircut_style: hairCut.Haircut_style,
-			Price: hairCut.Price,
-			Day: hairCut.Day,
-			Hour: hairCut.Hour,
-			User_id: userClaims,
+	err = services.InsertHaircut(db, &hair)
+		if err != nil {
+			http.Error(w, "Erro com banco de dados", http.StatusBadRequest)
+			return
 		}
 
-	 err = services.InsertHairCut(db, &hair)
-	   if err != nil {
-		  http.Error(w, "Erro ao criar corte de cabelo", http.StatusBadRequest)
-		  return
-	   }
+	json.NewEncoder(w).Encode(map[string]interface{} {
+		"message" : "Corte de cabelo criado",
+		"haircut" : hair,
+	})
+}
+
+func HandlerGetAllHairs(w http.ResponseWriter, r *http.Request,  db *sql.DB) {
+
+	hairs, err := services.GetAllHairs(db)
+		if err != nil {
+			http.Error(w, "Erro com o banco de dados", http.StatusBadRequest)
+			return
+		}
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message" : "Corte criado com sucesso",
-		"Corte" : hair,
+		"message" : "Cortes de cabelos listado com sucesso",
+		"haircuts" : hairs,
 	})
+}
 
+func HandlerDeleteHair(w http.ResponseWriter,  r *http.Request, db *sql.DB) {
+	var hairId models.Haircuts
+
+	err := json.NewDecoder(r.Body).Decode(&hairId)
+		if err != nil {
+			http.Error(w, "Erro ao enviar dados", http.StatusBadRequest)
+			return
+		}
+
+	err = services.DeleteHair(db, hairId.ID)
+		if err != nil {
+			http.Error(w, "Erro ao excluir o corte de cabelo", http.StatusBadRequest)
+			return
+		}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message" : "Corte de cabelo deletado com sucesso",
+	})
 }

@@ -8,10 +8,10 @@ import (
 
 func InsertUser(db *sql.DB, user *models.Users) error {
 
-	query := `INSERT INTO users (name, email, password, role) 
-			  VALUES ($1, $2, $3, $4);`
+	query := `INSERT INTO users (name, email, password) 
+			  VALUES ($1, $2, $3);`
 
-	_, err := db.Exec(query, user.Name, user.Email, user.Password, user.Role)
+	_, err := db.Exec(query, user.Name, user.Email, user.Password)
 	if err != nil {
 		fmt.Println("Erro com o banco de dados")
 		return err
@@ -51,7 +51,7 @@ func GetAllUser (db *sql.DB) ([]models.Users, error) {
 
 		var user  models.Users
 
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Role)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email,&user.Role)
 			if err != nil {
 				return nil, err
 			}
@@ -60,4 +60,17 @@ func GetAllUser (db *sql.DB) ([]models.Users, error) {
 	}
 
 	return users, nil
+}
+
+func DeleteUser (db *sql.DB, id int) error {
+	query := "DELETE FROM users WHERE id = $1"
+
+	_, err := db.Exec(query, id)
+		if err != nil {
+			fmt.Println("Erro com banco de dados", err)
+			return err
+		}
+
+	fmt.Println("ok..")
+	return nil
 }

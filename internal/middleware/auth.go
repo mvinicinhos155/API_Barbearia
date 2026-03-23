@@ -40,7 +40,9 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
+
 		ctx := context.WithValue(r.Context(), "userID", claims.ID)
+		ctx = context.WithValue(ctx, "role", claims.Role)
 
 			if err != nil {
 				fmt.Println("JWT ERROR:", err)
@@ -54,5 +56,23 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			}
 
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func PermisionAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		role, ok := r.Context().Value("role").(string)
+		if !ok {
+			http.Error(w, "erro ao obter role", http.StatusUnauthorized)
+			return
+		}
+
+		if role != "ADMIN" {
+			http.Error(w, "permissão só de admin", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }
