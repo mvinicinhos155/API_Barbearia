@@ -7,7 +7,7 @@ import (
 	"api_barbearia/internal/jobs"
 	"log"
 	"net/http"
-
+	"github.com/rs/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -23,7 +23,18 @@ func main() {
 			log.Println("Erro ao conectar com bancos de dados", err)
 		} 
 
-	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:5173"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Content-Type",  "Authorization"},
+		AllowCredentials: true,
+	})
+
+	corsHandler := c.Handler(mux)
+
+	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
 
 		switch r.Method {
 		case http.MethodPost:
@@ -31,7 +42,7 @@ func main() {
 		}
 	})
 
-	http.Handle("/users", middleware.AuthMiddleware(middleware.PermisionAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/users", middleware.AuthMiddleware(middleware.PermisionAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodGet:
 			handler.HandlerGetUsers(w, r, db)
@@ -41,49 +52,49 @@ func main() {
 		}
 	}))))
 
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			handler.HandlerLogin(w, r, db)
 		}
 	})
 
-		http.Handle("/usersID", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("/usersID", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodDelete:
 			handler.HandlerDeleteUser(w, r, db)
 		}
 	})))
 
-	http.Handle("/haircut", middleware.AuthMiddleware(middleware.PermisionAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/haircut", middleware.AuthMiddleware(middleware.PermisionAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodPost:
 			handler.HandlerCreateHairs(w, r, db)
 		}
 	}))))
 
-	http.HandleFunc("/haircuts", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/haircuts", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodGet:
 			handler.HandlerGetAllHairs(w, r, db)
 		}
 	})
 
-	http.HandleFunc("/haircutID", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/haircutID", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodDelete:
 			handler.HandlerDeleteHair(w, r, db)
 		}
 	})
 
-	http.Handle("/appointment", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/appointment", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodPost:
 			handler.HandlerCreateAppointment(w, r, db)
 		}
 	})))
 
-	http.Handle("/appoint", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/appoint", middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method{
 		case http.MethodGet:
 			handler.HandlerGetByUserId(w, r, db)
@@ -98,5 +109,5 @@ func main() {
 
 	log.Println("Servidor rodando na porta 8080")
                                                                                       
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", corsHandler)
 }
