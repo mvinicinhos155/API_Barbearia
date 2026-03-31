@@ -5,6 +5,7 @@ import (
 	"api_barbearia/internal/services"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -20,9 +21,10 @@ func HandlerCreateAppointment(w http.ResponseWriter, r *http.Request, db *sql.DB
 
 	err := json.NewDecoder(r.Body).Decode(&Input)
 		if err != nil {
-			http.Error(w, "Erro ao enviar dados para banco de dados", http.StatusBadRequest)
+			fmt.Println("ERRO REAL:", err) // 👈 MOSTRA NO TERMINAL
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
-		}
+}
 
 	appointment := models.Appointments {
 		UserId: userID,
@@ -54,5 +56,43 @@ func HandlerGetByUserId(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message" : "agendamento do usuário listado com sucesso",
 		"appointment" : appoint,
+	})
+}
+
+func HandlerGetByDate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+
+	// 📅 pega a data da URL
+	date := r.URL.Query().Get("date")
+
+	if date == "" {
+		http.Error(w, "date é obrigatória", http.StatusBadRequest)
+		return
+	}
+
+	// 🔍 chama o service
+	times, err := services.GetAppointByDate(db, date)
+	if err != nil {
+		http.Error(w, "erro ao buscar horários", http.StatusInternalServerError)
+		return
+	}
+
+	// 📤 retorna JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"times": times,
+	})
+}
+
+func HandlerGetAllAppointment(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+
+	appoint, err := services.GetAllAppointment(db)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+	json.NewEncoder(w).Encode(map[string]interface{} {
+		"message" : "Agendamento litado com sucesso",
+		"appointments" : appoint,
 	})
 }

@@ -101,6 +101,36 @@ func main() {
 		}
 	})))
 
+	mux.Handle("/all_appointments", middleware.AuthMiddleware(middleware.PermisionAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodGet:
+			handler.HandlerGetAllAppointment(w, r, db)
+		}
+	}))))
+
+	mux.HandleFunc("/appointments", func(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		handler.HandlerGetByDate(w, r, db)
+		return
+	}
+
+	http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+})
+
+	mux.HandleFunc("/message", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodPost:
+			handler.HandlerSendMessage(w, r, db)
+		}
+	})
+
+	mux.HandleFunc("/messagens", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method{
+		case http.MethodGet:
+			handler.HandlerGetMessage(w, r, db)
+		}
+	})
+
 
 	jobs.StartReminderJob(db)
 

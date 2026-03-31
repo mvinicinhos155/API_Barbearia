@@ -48,6 +48,27 @@ func CreateTableAppointment (db *sql.DB) error {
 	return nil
 }
 
+func CreateTableMessage (db *sql.DB) error {
+
+	query := (`CREATE TABLE IF NOT EXISTS messagens (
+				id SERIAL PRIMARY KEY,
+				name TEXT NOT NULL,
+				email TEXT NOT NULL,
+				message TEXT NOT NULL	
+	)
+	`)
+	
+	_, err := db.Exec(query)
+		if err != nil {
+			fmt.Println("Erro ao criar tabela")
+			return err
+		}
+
+	fmt.Println(("tabela criada com sucesso"))
+	return nil
+
+}
+
 func UpdateUserRole(db *sql.DB) error {
 	var email = os.Getenv("USER_ADMIN")
 	fmt.Println(email)
