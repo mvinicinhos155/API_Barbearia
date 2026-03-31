@@ -21,7 +21,7 @@ func HandlerCreateAppointment(w http.ResponseWriter, r *http.Request, db *sql.DB
 
 	err := json.NewDecoder(r.Body).Decode(&Input)
 		if err != nil {
-			fmt.Println("ERRO REAL:", err) // 👈 MOSTRA NO TERMINAL
+			fmt.Println("ERRO REAL:", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 }
@@ -61,7 +61,6 @@ func HandlerGetByUserId(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func HandlerGetByDate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
-	// 📅 pega a data da URL
 	date := r.URL.Query().Get("date")
 
 	if date == "" {
@@ -69,14 +68,12 @@ func HandlerGetByDate(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// 🔍 chama o service
 	times, err := services.GetAppointByDate(db, date)
 	if err != nil {
 		http.Error(w, "erro ao buscar horários", http.StatusInternalServerError)
 		return
 	}
 
-	// 📤 retorna JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"times": times,
