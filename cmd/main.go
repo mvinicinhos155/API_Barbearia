@@ -34,8 +34,11 @@ func main() {
 	mux := http.NewServeMux()
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:5173"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedOrigins: []string{
+			"http://localhost:5173",
+			"https://barbearia-frontend-theta.vercel.app",
+		},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Content-Type",  "Authorization"},
 		AllowCredentials: true,
 	})
