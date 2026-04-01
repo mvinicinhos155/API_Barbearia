@@ -16,11 +16,16 @@ func StartReminderJob(db *sql.DB) {
 }
 
 func checkeAppointments(db *sql.DB) {
+	if db == nil {
+		fmt.Println("db está nil")
+		return
+	}
+
 	query := "SELECT id, user_id, haircut_id, date FROM appointments"
 
 	rows, err := db.Query(query)
 		if err != nil {
-			fmt.Println("Erro ao bascar agendamento", err)
+			fmt.Println("Erro ao buscar agendamento:", err)
 			return
 		}
 
@@ -34,13 +39,14 @@ func checkeAppointments(db *sql.DB) {
 
 		err := rows.Scan(&id, &userID, &haircutID, &date)
 			if err != nil {
+				fmt.Println("Erro ao ler dados:", err)
 				continue
 			}
 
 	diff := date.Sub(now)
 
-	for diff > 0 && diff <= 1*time.Minute {
-		fmt.Printf("lembrete: Usuário %d tem um corte em breve", userID)
+	if diff > 0 && diff <= 1*time.Minute {
+		fmt.Printf("lembrete: Usuário %d tem um corte em breve\n", userID)
 	}
 
 	}

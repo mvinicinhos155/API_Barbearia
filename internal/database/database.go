@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -11,16 +10,13 @@ import (
 
 func Connect () (*sql.DB, error) {
 
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
+	dbURL := os.Getenv("DATABASE_URL")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, password, dbname, port)
+	if dbURL == "" {
+		log.Fatal("DATABASE_URL não encontrada")
+	}
 
-
-	db, err :=  sql.Open("pgx", dsn)
+	db, err :=  sql.Open("pgx", dbURL)
 		if err != nil {
 			return nil, err
 		}

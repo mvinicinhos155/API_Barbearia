@@ -58,7 +58,7 @@ func HandlerLogin (w http.ResponseWriter, r *http.Request, db *sql.DB){
 
 	 err := json.NewDecoder(r.Body).Decode(&Login)
 	 	if err != nil {
-			http.Error(w, "Erro ao enviar dados", http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return 
 		}
 

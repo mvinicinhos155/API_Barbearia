@@ -3,25 +3,33 @@ package main
 import (
 	"api_barbearia/internal/database"
 	"api_barbearia/internal/handlers"
-	"api_barbearia/internal/middleware"
 	"api_barbearia/internal/jobs"
+	"api_barbearia/internal/middleware"
 	"log"
 	"net/http"
-	"github.com/rs/cors"
+	"os"
+
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 func main() {
 
 
+	if os.Getenv("ENV") != "production" {
 	err := godotenv.Load()
-	if err != nil{log.Printf("Erro ao carregar o arquivo .env %s" , err)}
+		if err != nil {
+			log.Println("Aviso: .env não carregado")
+		}
+	}
 
 
 	db, err := database.Connect()
 		if err != nil {
-			log.Println("Erro ao conectar com bancos de dados", err)
+			log.Fatal("Erro ao conectar com bancos de dados", err)
 		} 
+
+	jobs.StartReminderJob(db)
 
 	mux := http.NewServeMux()
 
@@ -132,12 +140,17 @@ func main() {
 	})
 
 
-	jobs.StartReminderJob(db)
-
 	database.Migrations(db)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	log.Println("Servidor rodando na porta 8080")
-                                                                                      
-	http.ListenAndServe(":8080", corsHandler)
+
+	log.Println("Servidor rodando na porta",  port)                                                                                
+	err = http.ListenAndServe(":"+port, corsHandler)
+	if err != nil {
+		log.Fatal("Erro ao iniciar servidor:", err)
+	}
 }

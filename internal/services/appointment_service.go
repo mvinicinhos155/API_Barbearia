@@ -60,9 +60,12 @@ func GetAppointByDate(db *sql.DB, date string) ([]string, error) {
 	
 	for rows.Next(){
 		var fulldate time.Time
-		rows.Scan(&fulldate)
+		err := rows.Scan(&fulldate)
+			if err != nil {
+				return nil, err
+			}
 
-		hour := fulldate.Format("15:40")
+		hour := fulldate.Format("15:04")
 		times = append(times, hour) 
 	}
 
@@ -70,7 +73,7 @@ func GetAppointByDate(db *sql.DB, date string) ([]string, error) {
 }
 
 func GetAllAppointment (db *sql.DB) ([]models.Appointments, error) {
-	query := "SELECT * FROM appointments"
+	query := "SELECT id, user_id, haircut_id, date, notified FROM appointments"
 
 	rows, err := db.Query(query)
 		if err != nil {

@@ -27,7 +27,7 @@ func GetUserbyEmail (db *sql.DB, email string) (models.Users , error) {
 
 	 err := db.QueryRow(query, email).Scan(&user.ID, &user.Name,&user.Email, &user.Password, &user.Role)
 		if err != nil {
-			fmt.Println("Erro com banco de dados")
+			fmt.Println("Erro com banco de dados", err)
 			return user, err
 		}
 
