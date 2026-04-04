@@ -9,7 +9,7 @@ import (
 func InsertUser(db *sql.DB, user *models.Users) error {
 
 	query := `INSERT INTO users (name, email, password, phone) 
-			  VALUES ($1, $2, $3, $4, $5);`
+			  VALUES ($1, $2, $3, $4);`
 
 	_, err := db.Exec(query, user.Name, user.Email, user.Password, user.Phone)
 	if err != nil {
