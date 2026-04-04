@@ -142,9 +142,6 @@ func main() {
 		}
 	})
 
-
-	database.Migrations(db)
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

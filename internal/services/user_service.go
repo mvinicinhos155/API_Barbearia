@@ -8,10 +8,10 @@ import (
 
 func InsertUser(db *sql.DB, user *models.Users) error {
 
-	query := `INSERT INTO users (name, email, password) 
-			  VALUES ($1, $2, $3);`
+	query := `INSERT INTO users (name, email, password, phone) 
+			  VALUES ($1, $2, $3, $4, $5);`
 
-	_, err := db.Exec(query, user.Name, user.Email, user.Password)
+	_, err := db.Exec(query, user.Name, user.Email, user.Password, user.Phone)
 	if err != nil {
 		fmt.Println("Erro com o banco de dados")
 		return err
@@ -35,11 +35,11 @@ func GetUserbyEmail (db *sql.DB, email string) (models.Users , error) {
 }
 
 func GetAllUser (db *sql.DB) ([]models.Users, error) {
-	query := "SELECT id, name, email, role FROM users"
+	query := "SELECT id, name, email, role, phone FROM users"
 
 	rows, err := db.Query(query)
 		if err != nil {
-			fmt.Println("Erro com bbanco de dados")
+			fmt.Println("Erro com banco de dados")
 			return nil, err
 		}
 	
@@ -48,10 +48,9 @@ func GetAllUser (db *sql.DB) ([]models.Users, error) {
 	var users []models.Users
 
 	for rows.Next() {
-
 		var user  models.Users
 
-		err := rows.Scan(&user.ID, &user.Name, &user.Email,&user.Role)
+		err := rows.Scan(&user.ID, &user.Name, &user.Email,&user.Role, &user.Phone)
 			if err != nil {
 				return nil, err
 			}
