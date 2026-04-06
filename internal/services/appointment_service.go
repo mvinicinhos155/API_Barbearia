@@ -3,19 +3,54 @@ package services
 import (
 	"api_barbearia/internal/models"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
 
 func InsertAppointment(db *sql.DB, appoint *models.Appointments) error {
+
+	if appoint.Date.Before(time.Now()) {
+		return errors.New("Vc não pode agendar no passado, tente novamente")
+	}
+
+	var exists bool
+
+	queryCheck := "SELECT EXISTS(SELECT date FROM appointments WHERE date = $1)"
+
+	err := db.QueryRow(queryCheck, appoint.Date).Scan(&exists)
+		if err != nil {
+			return errors.New("Horario já está ocupado")
+		}
+
 	query := "INSERT INTO appointments (user_id, haircut_id, date) VALUES ($1, $2, $3)"
 
-	_, err := db.Exec(query, appoint.UserId, appoint.HaircutId, appoint.Date)
+	_, err = db.Exec(query, appoint.UserId, appoint.HaircutId, appoint.Date)
 		if err != nil {
 			fmt.Println("Erro com banco de dados", err)
 			return err
 		}
 
+	return nil
+}
+
+func Excluir (db *sql.DB) error {
+	query := "DELETE FROM appointments"
+	db.Exec(query)
+
+	fmt.Println("Excluido com sucesso")
+	return nil
+}
+
+func AddUnique (db *sql.DB) error {
+	query := "ALTER TABLE appointments ADD CONSTRAINT unique_date UNIQUE (date)"
+
+	_, err :=  db.Exec(query)
+		if err != nil {
+			return err
+		}
+
+	fmt.Println("tabela alterada com sucesso")
 	return nil
 }
 
