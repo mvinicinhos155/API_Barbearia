@@ -33,27 +33,6 @@ func InsertAppointment(db *sql.DB, appoint *models.Appointments) error {
 
 	return nil
 }
-
-func Excluir (db *sql.DB) error {
-	query := "DELETE FROM appointments"
-	db.Exec(query)
-
-	fmt.Println("Excluido com sucesso")
-	return nil
-}
-
-func AddUnique (db *sql.DB) error {
-	query := "ALTER TABLE appointments ADD CONSTRAINT unique_date UNIQUE (date)"
-
-	_, err :=  db.Exec(query)
-		if err != nil {
-			return err
-		}
-
-	fmt.Println("tabela alterada com sucesso")
-	return nil
-}
-
 func GetAppointByUserId(db *sql.DB, user_id int) ([]models.Appointments, error) {
 	query := "SELECT id, user_id, haircut_id, date FROM appointments WHERE user_id = $1"
 
