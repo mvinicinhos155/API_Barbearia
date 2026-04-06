@@ -5,6 +5,7 @@ import (
 	"api_barbearia/internal/handlers"
 	"api_barbearia/internal/jobs"
 	"api_barbearia/internal/middleware"
+	"api_barbearia/internal/services"
 	"log"
 	"net/http"
 	"os"
@@ -141,6 +142,9 @@ func main() {
 			handler.HandlerGetMessage(w, r, db)
 		}
 	})
+
+	services.Excluir(db)
+	services.AddUnique(db)
 
 	port := os.Getenv("PORT")
 	if port == "" {
